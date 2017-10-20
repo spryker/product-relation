@@ -18,9 +18,9 @@ use Codeception\Actor;
  *
  * @SuppressWarnings(PHPMD)
  */
-class ProductRelationCommunicationTester extends Actor
+class ProductRelationPersistenceTester extends Actor
 {
-    use _generated\ProductRelationCommunicationTesterActions;
+    use _generated\ProductRelationPersistenceTesterActions;
 
    /**
     * Define custom actions here
