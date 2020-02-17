@@ -5,31 +5,31 @@
  * Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
  */
 
-namespace Spryker\Zed\ProductRelation\Communication\QueryBuilder;
+namespace Spryker\Zed\ProductRelation\Business\QueryBuilder;
 
 use Orm\Zed\Category\Persistence\Map\SpyCategoryAttributeTableMap;
 use Orm\Zed\Product\Persistence\Map\SpyProductAbstractTableMap;
-use Spryker\Zed\ProductRelation\Persistence\ProductRelationQueryContainerInterface;
+use Spryker\Zed\ProductRelation\Persistence\ProductRelationRepositoryInterface;
 
 class FilterProvider implements FilterProviderInterface
 {
     /**
-     * @var \Spryker\Zed\ProductRelation\Persistence\ProductRelationQueryContainerInterface
+     * @var \Spryker\Zed\ProductRelation\Persistence\ProductRelationRepositoryInterface
      */
-    protected $productRelationQueryContainer;
+    protected $productRelationRepository;
 
     /**
-     * @param \Spryker\Zed\ProductRelation\Persistence\ProductRelationQueryContainerInterface $productRelationQueryContainer
+     * @param \Spryker\Zed\ProductRelation\Persistence\ProductRelationRepositoryInterface $productRelationRepository
      */
-    public function __construct(ProductRelationQueryContainerInterface $productRelationQueryContainer)
+    public function __construct(ProductRelationRepositoryInterface $productRelationRepository)
     {
-        $this->productRelationQueryContainer = $productRelationQueryContainer;
+        $this->productRelationRepository = $productRelationRepository;
     }
 
     /**
      * @return array
      */
-    public function getFilters()
+    public function getFilters(): array
     {
         $filters = $this->buildProductFilters();
         $filters = array_merge($filters, $this->buildCategoryFilters());
@@ -41,24 +41,24 @@ class FilterProvider implements FilterProviderInterface
     /**
      * @return array
      */
-    protected function buildCategoryFilters()
+    protected function buildCategoryFilters(): array
     {
         return [
-           [
-               'id' => 'product_category_name',
-               'field' => SpyCategoryAttributeTableMap::COL_NAME,
-               'label' => 'category',
-               'type' => 'string',
-               'input' => 'text',
-               'operators' => $this->getTextOperators(),
-           ],
+            [
+                'id' => 'product_category_name',
+                'field' => SpyCategoryAttributeTableMap::COL_NAME,
+                'label' => 'category',
+                'type' => 'string',
+                'input' => 'text',
+                'operators' => $this->getTextOperators(),
+            ],
         ];
     }
 
     /**
      * @return array
      */
-    protected function buildProductFilters()
+    protected function buildProductFilters(): array
     {
         return [
             [
@@ -99,9 +99,9 @@ class FilterProvider implements FilterProviderInterface
     }
 
     /**
-     * @return array
+     * @return string[]
      */
-    protected function getTextOperators()
+    protected function getTextOperators(): array
     {
         return [
             'equal',
@@ -116,36 +116,32 @@ class FilterProvider implements FilterProviderInterface
     /**
      * @return array
      */
-    protected function buildProductAttributeFilters()
+    protected function buildProductAttributeFilters(): array
     {
         $productAttributeKeys = $this->findProductAttributes();
 
         $filters = [];
-        foreach ($productAttributeKeys as $productAttributeKeyEntity) {
-             $filters[] = [
-                 'id' => $this->buildAttributeKey($productAttributeKeyEntity->getKey()),
-                 'field' => SpyProductAbstractTableMap::COL_ATTRIBUTES,
-                 'label' => $productAttributeKeyEntity->getKey(),
-                 'type' => 'string',
-                 'input' => 'text',
-                 'optgroup' => 'attributes',
-                 'operators' => $this->getTextOperators(),
-             ];
+        foreach ($productAttributeKeys as $productAttributeKeyTransfer) {
+            $filters[] = [
+                'id' => $this->buildAttributeKey($productAttributeKeyTransfer->getKey()),
+                'field' => SpyProductAbstractTableMap::COL_ATTRIBUTES,
+                'label' => $productAttributeKeyTransfer->getKey(),
+                'type' => 'string',
+                'input' => 'text',
+                'optgroup' => 'attributes',
+                'operators' => $this->getTextOperators(),
+            ];
         }
 
         return $filters;
     }
 
     /**
-     * @return \Orm\Zed\Product\Persistence\SpyProductAttributeKey[]|\Propel\Runtime\Collection\ObjectCollection
+     * @return \Generated\Shared\Transfer\ProductAttributeKeyTransfer[]
      */
-    protected function findProductAttributes()
+    protected function findProductAttributes(): array
     {
-        $productAttributeKeys = $this->productRelationQueryContainer
-            ->queryProductAttributeKey()
-            ->find();
-
-        return $productAttributeKeys;
+        return $this->productRelationRepository->findProductAttributes();
     }
 
     /**
@@ -153,7 +149,7 @@ class FilterProvider implements FilterProviderInterface
      *
      * @return string
      */
-    protected function buildAttributeKey($persistedAttributeKey)
+    protected function buildAttributeKey($persistedAttributeKey): string
     {
         return 'product.json.' . $persistedAttributeKey;
     }
