@@ -5,12 +5,12 @@
  * Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
  */
 
-namespace Spryker\Zed\ProductRelation\Communication\QueryBuilder;
+namespace Spryker\Zed\ProductRelation\Business\QueryBuilder;
 
 interface FilterProviderInterface
 {
     /**
      * @return array
      */
-    public function getFilters();
+    public function getFilters(): array;
 }
